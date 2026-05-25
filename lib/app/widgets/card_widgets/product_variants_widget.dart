@@ -3,6 +3,7 @@ import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:keen_official_app/app/methods/download_resize_image.dart';
+import 'package:keen_official_app/app/providers/product_cart/cart_providers.dart';
 import 'package:keen_official_app/app/providers/product_details/product_details_provider.dart';
 import 'package:keen_official_app/domain/models/images_model.dart';
 import 'package:keen_official_app/domain/models/product_model.dart';
@@ -47,6 +48,7 @@ class ProductVariantsWidget extends ConsumerWidget {
                   ),
                 ),
               onTap: () {
+
                 for (int i = 0;i < product.images!.length;i++) {
                   if (product.images![i].src == image.src) {
                     swipeController.move(i);
@@ -56,6 +58,7 @@ class ProductVariantsWidget extends ConsumerWidget {
                 for (int i = 0;i < product.variants!.length;i++) {
                   if (product.variants![i].imageId == image.id) {
                     ref.read(variantColorIndexProvider.notifier).state = i;
+                    ref.read(productSelectedColorProvider.notifier).state = product.variants![i].option2!;
                   }
                 }
               },

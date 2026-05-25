@@ -23,22 +23,7 @@ class SaleNewSoldOutWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          false
-              ? Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 6.0,
-                  vertical: 3.0,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(4.0),
-                ),
-                child: Text(
-                  'New',
-                  style: TextStyle(color: Colors.black, fontSize: 12.0),
-                ),
-              )
-              : SizedBox(height: 0, width: 0),
+          SizedBox(height: 0, width: 0),
           SizedBox(height: 4),
           product.variants?[variantIndex].compareAtPrice != null
               ? Container(

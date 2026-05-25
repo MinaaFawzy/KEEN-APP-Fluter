@@ -1,107 +1,136 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:keen_official_app/app/providers/home/products_provider.dart';
-import 'package:keen_official_app/app/widgets/card_widgets/product_card.dart';
+
 import 'package:keen_official_app/domain/models/product_model.dart';
 
-List<ProductCard> MakeCards(List<Products> allProducts, Set<int> seen) {
-  List<ProductCard> cards = [];
-  print("${allProducts.length}++++++--------+++++++++++");
-  for (int i = 0; i < allProducts.length; i++) {
+class ProductVariantPair {
+  final Products product;
+  final int variantIndex;
+  ProductVariantPair(this.product, this.variantIndex);
+}
+
+List<ProductVariantPair> getProductVariantPairs(List<Products> allProducts) {
+  List<ProductVariantPair> pairs = [];
+  Set<int> seen = {};
+
+  allProducts.sort((a, b) {
+    if (a.createdAt == null) return 1;
+    if (b.createdAt == null) return -1;
+    return b.createdAt!.compareTo(a.createdAt!);
+  });
+
+  for (var product in allProducts) {
     seen.clear();
-    for (var variant in allProducts[i].variants!) {
-      seen.add(variant.imageId ?? 0);
-    }
-    for (int j = 0; j < allProducts[i].variants!.length; j++) {
-      if (seen.contains(allProducts[i].variants![j].imageId)) {
-        cards.add(ProductCard(product: allProducts[i], variantIndex: j));
-        seen.remove(allProducts[i].variants![j].imageId);
+    final variants = product.variants ?? [];
+    for (int i = 0; i < variants.length; i++) {
+      final imageId = variants[i].imageId ?? 0;
+      if (!seen.contains(imageId)) {
+        pairs.add(ProductVariantPair(product, i));
+        seen.add(imageId);
       }
     }
   }
-  print('cards count ${cards.length}');
-  return cards;
+  return pairs;
 }
 
 List<Products> filterTopProducts(List<Products> products) {
   return products
       .where((product) => product.status?.toLowerCase() == "active")
-      .toList();
+      .toList()
+    ..sort((a, b) {
+      if (a.createdAt == null) return 1;
+      if (b.createdAt == null) return -1;
+      return b.createdAt!.compareTo(a.createdAt!);
+    });
 }
 
 AsyncValue<List<Products>> getProductsAsyncType(WidgetRef ref, String type) {
-  AsyncValue<List<Products>> allProductsAsync = ref.watch(productsProvider);
   switch (type) {
     case 'All products':
-      allProductsAsync = ref.watch(productsProvider);
-      break;
+      return ref.watch(productsProvider);
     case 'Sets':
-      allProductsAsync = ref.watch(setsProductsProvider);
-      break;
+      return ref.watch(setsProductsProvider);
     case 'Back To Uni':
-      allProductsAsync = ref.watch(backToUniProductsProvider);
-      break;
+      return ref.watch(backToUniProductsProvider);
     case 'Dresses':
-      allProductsAsync = ref.watch(dressProductsProvider);
-      break;
+      return ref.watch(dressProductsProvider);
     case 'Sale "25':
-      allProductsAsync = ref.watch(onSaleProductsProvider);
-      break;
+      return ref.watch(onSaleProductsProvider);
     case 'All Tops':
-      allProductsAsync = ref.watch(allTopsProductsProvider);
-      break;
+      return ref.watch(allTopsProductsProvider);
     case 'T-Shirts':
-      allProductsAsync = ref.watch(tShirtProductsProvider);
-      break;
+      return ref.watch(tShirtProductsProvider);
     case 'Tops':
-      allProductsAsync = ref.watch(topsProductsProvider);
-      break;
+      return ref.watch(topsProductsProvider);
     case 'Shirts':
-      allProductsAsync = ref.watch(shirtsProductsProvider);
-      break;
+      return ref.watch(shirtsProductsProvider);
     case 'All Bottoms':
-      allProductsAsync = ref.watch(bottomProductsProvider);
-      break;
+      return ref.watch(bottomProductsProvider);
     case 'Pants':
-      allProductsAsync = ref.watch(pantsProductsProvider);
-      break;
+      return ref.watch(pantsProductsProvider);
     case 'Skirts':
-      allProductsAsync = ref.watch(skirtsProductsProvider);
-      break;
+      return ref.watch(skirtsProductsProvider);
     case 'Shorts':
-      allProductsAsync = ref.watch(shortsProductsProvider);
-      break;
+      return ref.watch(shortsProductsProvider);
     case 'End Of Season Sale':
-      allProductsAsync = ref.watch(endOfSeasonSaleProvider);
-      break;
+      return ref.watch(endOfSeasonSaleProvider);
     case 'New Arrivals':
-      allProductsAsync = ref.watch(newArrivalsProvider);
-      break;
+      return ref.watch(newArrivalsProvider);
     case 'Best Sellers':
-      allProductsAsync = ref.watch(bestSellersProvider);
-      break;
+      return ref.watch(bestSellersProvider);
     case 'Fall Layers':
-      allProductsAsync = ref.watch(fallLayersProvider);
-      break;
+      return ref.watch(fallLayersProvider);
     default:
-      allProductsAsync = ref.watch(productsProvider);
+      return ref.watch(productsProvider);
   }
-  return allProductsAsync;
 }
 
-
 bool checkQuantity(Products product, int variantIndex) {
-
   if ((product.variants?[variantIndex].inventoryQuantity == 0) &&
       (product.variants?[variantIndex].oldInventoryQuantity == 0)) {
     for (int i = 0; i < product.variants!.length; i++) {
       if ((product.variants?[i].option2 ==
-          product.variants?[variantIndex].option2) &&
-          (product.variants?[i].inventoryQuantity ??  0) > 0) {
+              product.variants?[variantIndex].option2) &&
+          (product.variants?[i].inventoryQuantity ?? 0) > 0) {
         return false;
       }
     }
-    return true ;
+    return true;
   } else {
     return false;
   }
+}
+
+List<List<Products>> filterProductsCollection(List<Products> products) {
+  List<List<Products>> filteredProducts = [];
+  List<Products> sets = [];
+  List<Products> pants = [];
+  List<Products> tShirts = [];
+
+  final activeProducts = products
+      .where((product) => product.status?.toLowerCase() == "active")
+      .toList();
+
+  for (var product in activeProducts) {
+    final type = product.productType?.toLowerCase() ?? '';
+    switch (type) {
+      case 'set':
+        sets.add(product);
+        break;
+      case 'pants':
+        pants.add(product);
+        break;
+      case 't-shirt':
+      case 'woman t-shirt':
+        tShirts.add(product);
+        break;
+      default:
+        break;
+    }
+  }
+  filteredProducts.add(tShirts);
+  filteredProducts.add(sets);
+  filteredProducts.add(pants);
+
+  return filteredProducts;
 }

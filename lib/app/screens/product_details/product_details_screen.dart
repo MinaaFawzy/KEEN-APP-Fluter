@@ -39,6 +39,7 @@ class ProductDetailsScreen extends ConsumerWidget {
         .watch(favProductsProvider)
         .contains('${product.variants?[variantIndex].id}');
 
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -85,15 +86,13 @@ class ProductDetailsScreen extends ConsumerWidget {
                         : Text('Availability: Out of Stock'),
                     SizedBox(height: 8),
                     TextPriceWidget(
-                      product: product,
+                      product: product.variants![variantIndex],
                       fontSize: 16,
                       detailsScreen: true,
                     ),
                     SizedBox(height: 8),
                     Text(
-                      'Color: ${(_variantColorIndex >= 0 && _variantColorIndex < (product.variants?.length ?? 0))
-                          ? (product.variants?[_variantColorIndex].option2 ?? 'No Color Found')
-                          : 'No Color Found'}',
+                      'Color: ${(_variantColorIndex >= 0 && _variantColorIndex < (product.variants?.length ?? 0)) ? (product.variants?[_variantColorIndex].option2 ?? 'No Color Found') : 'No Color Found'}',
                     ),
                     SizedBox(height: 8),
                     if (anotherColors.isNotEmpty)
@@ -105,9 +104,7 @@ class ProductDetailsScreen extends ConsumerWidget {
                       ),
                     SizedBox(height: 8),
                     Text(
-                      'Size: ${(_sizeIndex >= 0 && _sizeIndex < (product.options![0].values?.length ?? 0))
-                          ? (product.options![0].values?[_sizeIndex] )
-                          : 'No Size Found'}',
+                      'Size: ${(_sizeIndex >= 0 && _sizeIndex < (product.options![0].values?.length ?? 0)) ? (product.options![0].values?[_sizeIndex]) : 'No Size Found'}',
                     ),
                     SizedBox(height: 8),
                     SizeList(sizeIndex: _sizeIndex, product: product),
@@ -119,7 +116,11 @@ class ProductDetailsScreen extends ConsumerWidget {
                         children: [
                           Container(
                             width: MediaQuery.of(context).size.width * 0.75,
-                            child: AddToCartButton(title: 'Buy Now'),
+                            child: AddToCartButton(
+                              title: 'Buy Now',
+                              product: product,
+                              variantIndex: variantIndex,
+                            ),
                           ),
                           FavButtonWidget(
                             isFavProduct: isFavProduct,
@@ -153,8 +154,6 @@ class ProductDetailsScreen extends ConsumerWidget {
     );
   }
 }
-
-
 
 String getImageUrl(Products product, int index) {
   return product.images![index].src!;

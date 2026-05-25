@@ -7,23 +7,33 @@ import 'package:keen_official_app/app/widgets/top_bar_widget.dart';
 import 'package:keen_official_app/domain/models/product_model.dart';
 import '../../widgets/card_widgets/product_card.dart';
 
-class ShopScreen extends ConsumerWidget {
-  ShopScreen({super.key});
+class ShopScreen extends ConsumerStatefulWidget {
+  const ShopScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final ScrollController _scrollController = ScrollController();
+  ConsumerState<ShopScreen> createState() => _ShopScreenState();
+}
+
+class _ShopScreenState extends ConsumerState<ShopScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final productsTitle = ref.watch(productsTitleProvider);
     AsyncValue<List<Products>> allProductsAsync = getProductsAsyncType(
       ref,
       productsTitle,
     );
-    Set<int> seen = {};
-
     return allProductsAsync.when(
       data: (products) {
         List<Products> allProducts = filterTopProducts(products);
-        final List<ProductCard> cards = MakeCards(allProducts, seen);
+        final List<ProductVariantPair> pairs = getProductVariantPairs(allProducts);
         return Scaffold(
           drawer: SideMenuDrawer(scrollController: _scrollController),
           body: SafeArea(
@@ -50,7 +60,7 @@ class ShopScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                cards.isEmpty
+                pairs.isEmpty
                     ? Column(
                       children: [
                         SizedBox(
@@ -69,9 +79,12 @@ class ShopScreen extends ConsumerWidget {
                               crossAxisSpacing: 0.4,
                               mainAxisSpacing: 0.5,
                             ),
-                        itemCount: cards.length,
+                        itemCount: pairs.length,
                         itemBuilder: (context, index) {
-                          return cards[index];
+                          return ProductCard(
+                            product: pairs[index].product,
+                            variantIndex: pairs[index].variantIndex,
+                          );
                         },
                         addAutomaticKeepAlives: true,
                       ),

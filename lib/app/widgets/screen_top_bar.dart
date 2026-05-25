@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:keen_official_app/app/providers/product_details/product_details_provider.dart';
 
 class ScreensTopBarWidget extends ConsumerWidget {
   const ScreensTopBarWidget({super.key, required this.title, required this.space});

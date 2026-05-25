@@ -2,6 +2,7 @@ import 'package:bottom_bar/bottom_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:keen_official_app/app/providers/cart/shopify_cart_provider.dart';
 import 'package:keen_official_app/app/providers/home/products_provider.dart';
 import 'package:keen_official_app/app/providers/search/search_providers.dart';
 import 'package:keen_official_app/app/screens/account/account_screen.dart';
@@ -19,8 +20,9 @@ class BottomNavBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bottomIndex = ref.watch(bottomIndexProvider);
+    final cartCount = ref.watch(cartItemCountProvider);
 
-    final List<Widget> screens =  [
+    final List<Widget> screens = [
       HomeScreen(),
       SearchScreen(),
       ShopScreen(),
@@ -69,9 +71,38 @@ class BottomNavBar extends ConsumerWidget {
               activeColor: Colors.grey,
             ),
             BottomBarItem(
-              icon: Icon(
-                Icons.shopping_bag_outlined,
-                color: bottomIndex == 4 ? Colors.black : Colors.grey,
+              icon: Stack(
+                children: [
+                  Icon(
+                    Icons.shopping_bag_outlined,
+                    color: bottomIndex == 4 ? Colors.black : Colors.grey,
+                  ),
+                  cartCount == 0
+                      ? const SizedBox()
+                      : Positioned(
+                        right: 0,
+                        top: 0,
+                        child: Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color:
+                                bottomIndex == 4 ? Colors.black : Colors.grey,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Text(
+                              '$cartCount',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 6,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                ],
               ),
               activeColor: Colors.grey,
             ),

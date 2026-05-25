@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:keen_official_app/app/providers/api_provider.dart';
+import 'package:keen_official_app/app/methods/shop_methods.dart';
 import 'package:keen_official_app/data/repositories_imp/product_repository_imp.dart';
 import 'package:keen_official_app/domain/models/product_model.dart';
 import 'package:keen_official_app/domain/repositories/product_repository.dart';
@@ -96,3 +97,19 @@ final fallLayersProvider = FutureProvider<List<Products>>((ref) {
   final productRepository = ref.watch(productRepositoryProvider);
   return productRepository.getCollectionProducts('521930047707');
 });
+
+final filteredNewArrivalsProvider = Provider<List<Products>>((ref) {
+  final products = ref.watch(newArrivalsProvider).value ?? [];
+  return filterTopProducts(products);
+});
+
+final filteredBestSellersProvider = Provider<List<Products>>((ref) {
+  final products = ref.watch(bestSellersProvider).value ?? [];
+  return filterTopProducts(products);
+});
+
+final collectionsProductsProvider = Provider<List<List<Products>>>((ref) {
+  final products = ref.watch(productsProvider).value ?? [];
+  return filterProductsCollection(products);
+});
+

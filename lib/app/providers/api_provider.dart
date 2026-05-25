@@ -6,7 +6,12 @@ import 'package:riverpod/riverpod.dart';
 import 'package:dio/dio.dart';
 
 final dioProvider = Provider<Dio>((ref) {
-  return Dio(BaseOptions(baseUrl: AppApis.baseUrl));
+  return Dio(BaseOptions(
+    baseUrl: AppApis.baseUrl,
+    connectTimeout: const Duration(seconds: 10),
+    receiveTimeout: const Duration(seconds: 30),
+    sendTimeout: const Duration(seconds: 30),
+  ));
 });
 
 final apiServiceProvider = Provider<ApiService>((ref) {

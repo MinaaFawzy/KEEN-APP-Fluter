@@ -27,7 +27,7 @@ class Images {
 
   Images.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    alt = json['alt'];
+    alt = json['alt'] == null ? null : (json['alt'] is String ? double.tryParse(json['alt']) : (json['alt'] as num?)?.toDouble());
     position = json['position'];
     productId = json['product_id'];
     createdAt = json['created_at'];

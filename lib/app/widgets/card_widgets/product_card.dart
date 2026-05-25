@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:keen_official_app/app/methods/download_resize_image.dart';
 import 'package:keen_official_app/app/methods/shop_methods.dart';
 import 'package:keen_official_app/app/providers/product/is_fav_product_providers.dart';
+import 'package:keen_official_app/app/providers/product_cart/cart_providers.dart';
 import 'package:keen_official_app/app/providers/product_details/product_details_provider.dart';
 import 'package:keen_official_app/app/screens/product_details/product_details_screen.dart';
 import 'package:keen_official_app/app/widgets/card_widgets/add_to_cart_button_widget.dart';
@@ -16,35 +17,31 @@ import 'package:keen_official_app/domain/models/images_model.dart';
 import 'package:keen_official_app/domain/models/product_model.dart';
 
 class ProductCard extends ConsumerWidget {
-  ProductCard({super.key, required this.product, required this.variantIndex});
+  const ProductCard({super.key, required this.product, required this.variantIndex});
 
-  final variantIndex;
+  final int variantIndex;
   final Products product;
-  String imageUrl = '';
-  List<Images> anotherColors = [];
-  Set<int> imagesIds = {};
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    String imageUrl = '';
+    List<Images> anotherColors = [];
+
 
     final favProducts = ref.watch(favProductsProvider);
+
     final isFavProduct = favProducts.contains(
       '${product.variants?[variantIndex].id}',
     );
     final bool isSoldOut = checkQuantity(product, variantIndex);
 
-    anotherColors = [];
-    for (var image in product.images!) {
-      if (image.id == product.variants?[variantIndex].imageId) {
-        imageUrl =
-            image.src ??
-            'https://icon-library.com/images/no-image-icon/no-image-icon-0.jpg';
+    final variantImageId = product.variants?[variantIndex].imageId;
+    final imagesIds = product.variants?.map((v) => v.imageId ?? 0).toSet() ?? {};
+
+    for (var image in product.images ?? []) {
+      if (image.id == variantImageId) {
+        imageUrl = image.src ?? 'https://icon-library.com/images/no-image-icon/no-image-icon-0.jpg';
       }
-    }
-    for (var variant in product.variants!) {
-      imagesIds.add(variant.imageId ?? 0);
-    }
-    for (var image in product.images!) {
       if (imagesIds.contains(image.id)) {
         anotherColors.add(image);
       }
@@ -91,7 +88,7 @@ class ProductCard extends ConsumerWidget {
                       product: product,
                       variantIndex: variantIndex,
                     ),
-                    TextPriceWidget(product: product, fontSize: 10),
+                    TextPriceWidget(product: product.variants![variantIndex], fontSize: 10),
                     if (anotherColors.isNotEmpty)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -104,13 +101,13 @@ class ProductCard extends ConsumerWidget {
                                   child: CircleAvatar(
                                     radius:anotherColors.length > 6 ? 9 :  12, // Size of the image circle
                                     backgroundImage:
-                                        Image.network(
+                                        NetworkImage(
                                           getResizedImageUrl(
                                             image.src!,
                                             80,
                                             80,
                                           ),
-                                        ).image,
+                                        ),
                                   ),
                                 ),
                               )
@@ -126,6 +123,9 @@ class ProductCard extends ConsumerWidget {
                 isSoldOut
                         ? 'NOTIFY ME'
                         : 'QUICK ADD',
+                product: product,
+                variantIndex: variantIndex,
+                isProductsScreen: true,
               ),
             ],
           ),
@@ -134,6 +134,8 @@ class ProductCard extends ConsumerWidget {
             ref.read(isFavoriteProvider.notifier).state = isFavProduct;
             ref.read(variantColorIndexProvider.notifier).state = variantIndex;
             ref.read(sizeIndexProvider.notifier).state = 0;
+            ref.read(productSelectedColorProvider.notifier).state = product.variants![variantIndex].option2!;
+            ref.read(productSelectedSizeProvider.notifier).state = product.variants![variantIndex].option1!;
             Navigator.push(
               context,
               MaterialPageRoute(

@@ -7,29 +7,39 @@ import 'package:keen_official_app/app/widgets/card_widgets/product_card.dart';
 import 'package:keen_official_app/app/widgets/search_Widgets/search_text_field_widget.dart';
 import 'package:keen_official_app/domain/models/product_model.dart';
 
-class SearchScreen extends ConsumerWidget {
+class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SearchScreen> createState() => _SearchScreenState();
+}
 
-    final ScrollController _scrollController = ScrollController();
+class _SearchScreenState extends ConsumerState<SearchScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final isSearching = ref.watch(isSearchProvider);
     final textSearch = ref.watch(textSearchValueProvider);
     final allProductsAsync = getProductsAsyncType(ref, 'All Products');
-    Set<int> seen = {};
 
     return allProductsAsync.when(
       data: (products) {
         List<Products> filteredProducts = filterAndSortProductsForSearch(products, textSearch);
-        print('${filteredProducts.length}*--*-*-*-*-*-*-**-*');
-        final List<ProductCard> cards = MakeCards(filteredProducts, seen);
+        final List<ProductVariantPair> pairs = getProductVariantPairs(filteredProducts);
+        
         return Scaffold(
           body: SafeArea(
             child: Column(
               children: [
                 SearchTextField(),
-                isSearching && cards.isNotEmpty
+                isSearching && pairs.isNotEmpty
                     ? Expanded(
                   child: GridView.builder(
                     controller: _scrollController,
@@ -40,9 +50,12 @@ class SearchScreen extends ConsumerWidget {
                       crossAxisSpacing: 0.4,
                       mainAxisSpacing: 0.5,
                     ),
-                    itemCount: cards.length,
+                    itemCount: pairs.length,
                     itemBuilder: (context, index) {
-                      return cards[index] ;
+                      return ProductCard(
+                        product: pairs[index].product,
+                        variantIndex: pairs[index].variantIndex,
+                      );
                     },
                     addAutomaticKeepAlives: true,
                   ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:keen_official_app/domain/models/product_model.dart';
+import 'package:keen_official_app/domain/models/variants_model.dart';
 
 class TextPriceWidget extends StatelessWidget {
   const TextPriceWidget({
@@ -7,38 +7,40 @@ class TextPriceWidget extends StatelessWidget {
     required this.product,
     required this.fontSize,
     this.detailsScreen = false,
+    this.isCartScreen = false,
   });
 
-  final Products product;
+  final Variants product;
   final double fontSize;
   final bool detailsScreen;
+  final bool isCartScreen;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.baseline,
       mainAxisAlignment:
-          detailsScreen ? MainAxisAlignment.start : MainAxisAlignment.center,
+          detailsScreen || isCartScreen ? MainAxisAlignment.start : MainAxisAlignment.center,
       textBaseline: TextBaseline.alphabetic,
       children: [
         // Display old price if available
-        if (product.variants?[0].compareAtPrice !=
+        if (product.compareAtPrice !=
             null) // Only show if oldPrice is not null
           Text(
-            'LE ${product.variants?[0].compareAtPrice}',
+            'LE ${product.compareAtPrice}',
             // Format old price
             style: TextStyle(
               fontSize: fontSize,
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              color: isCartScreen ? Colors.grey : Colors.black,
               // Faded color for old price
               decoration: TextDecoration.lineThrough, // Strikethrough effect
             ),
           ),
-        if (product.variants?[0].compareAtPrice != null)
+        if (product.compareAtPrice != null)
           const SizedBox(width: 8.0),
         Text(
-          'LE ${product.variants?[0].price}',
+          'LE ${product.price}',
           style: TextStyle(
             fontSize: fontSize,
             fontWeight: FontWeight.bold,

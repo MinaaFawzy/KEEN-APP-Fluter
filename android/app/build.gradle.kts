@@ -8,6 +8,7 @@ plugins {
 android {
     namespace = "com.keen.keenOfficial.keen_official_app"
     compileSdk = flutter.compileSdkVersion
+    buildToolsVersion = "35.0.1"
     ndkVersion = "27.0.12077973"
 
     compileOptions {
